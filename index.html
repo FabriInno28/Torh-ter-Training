@@ -1,19 +1,130 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#080b0d">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="KEEPER 10 – 10 Minuten Torhütertraining für Kids von 10 bis 14 Jahren.">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KEEPER 10</title>
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <main id="app" aria-live="polite"></main>
-  <script src="./app.js" defer></script>
+  <main class="app">
+    <section id="home" class="view active">
+      <header class="topbar">
+        <div class="brand">KEEPER<span>10</span></div>
+        <p class="subtitle">Sofort starten. Ohne Material oder mit einem Tennisball.</p>
+      </header>
+
+      <section class="intro card">
+        <h1>Die ersten 6 Keeper Übungen</h1>
+        <p>Direkt einsatzbereit für 10 bis 14 Jahre. Erst schauen, dann trainieren.</p>
+      </section>
+
+      <section class="group">
+        <div class="group-head">
+          <h2>Nur ich</h2>
+          <span class="pill">ohne Material</span>
+        </div>
+        <div class="cards">
+          <button class="exercise-card" data-id="ready">
+            <img src="./ready.png" alt="READY" />
+            <div class="exercise-copy">
+              <h3>1 · READY!</h3>
+              <p>Auf Signal sofort in die Grundstellung gehen.</p>
+            </div>
+          </button>
+          <button class="exercise-card" data-id="move-set">
+            <img src="./move-set.png" alt="MOVE & SET" />
+            <div class="exercise-copy">
+              <h3>2 · MOVE &amp; SET</h3>
+              <p>Kleine Schritte. Stoppen. Bereit sein.</p>
+            </div>
+          </button>
+          <button class="exercise-card" data-id="spring-land-ready">
+            <img src="./spring-land-ready.png" alt="SPRING LAND READY" />
+            <div class="exercise-copy">
+              <h3>3 · SPRING · LAND · READY</h3>
+              <p>Spring kurz. Lande weich. Sei sofort wieder bereit.</p>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <section class="group">
+        <div class="group-head">
+          <h2>Tennisball</h2>
+          <span class="pill">nur ich + 1 Tennisball</span>
+        </div>
+        <div class="cards">
+          <button class="exercise-card" data-id="drop">
+            <img src="./drop.jpg" alt="DROP" />
+            <div class="exercise-copy">
+              <h3>1 · DROP</h3>
+              <p>Ball fallen lassen und nach dem ersten Aufprall sichern.</p>
+            </div>
+          </button>
+          <button class="exercise-card" data-id="hoch-und-hin">
+            <img src="./hoch-und-hin.png" alt="HOCH UND HIN" />
+            <div class="exercise-copy">
+              <h3>2 · HOCH &amp; HIN</h3>
+              <p>Ball leicht seitlich hochwerfen und schnell darunter gehen.</p>
+            </div>
+          </button>
+          <button class="exercise-card" data-id="crazy-bounce">
+            <img src="./crazy-bounce.png" alt="CRAZY BOUNCE" />
+            <div class="exercise-copy">
+              <h3>3 · CRAZY BOUNCE</h3>
+              <p>Ball schräg aufwerfen und auf den Absprung reagieren.</p>
+            </div>
+          </button>
+        </div>
+      </section>
+    </section>
+
+    <section id="detail" class="view">
+      <button id="backButton" class="back-button" aria-label="Zurück">← Zurück</button>
+      <article class="detail-card">
+        <div class="detail-head">
+          <div>
+            <span id="detailTag" class="detail-tag"></span>
+            <h2 id="detailTitle"></h2>
+            <p id="detailDesc"></p>
+          </div>
+          <div class="logo-badge">K10</div>
+        </div>
+        <div class="meta-row">
+          <div id="detailMeta1" class="meta-chip"></div>
+          <div id="detailMeta2" class="meta-chip"></div>
+          <div id="detailMeta3" class="meta-chip"></div>
+        </div>
+        <img id="detailImage" class="detail-image" src="" alt="" />
+        <div class="detail-columns">
+          <div class="detail-box">
+            <h3>So geht’s</h3>
+            <ol id="detailSteps"></ol>
+          </div>
+          <div class="detail-box">
+            <h3>Achte darauf</h3>
+            <ul id="detailFocus"></ul>
+          </div>
+        </div>
+        <button id="startTimer" class="primary-btn">Timer starten</button>
+      </article>
+    </section>
+
+    <section id="timerView" class="view timer-view">
+      <button id="timerBack" class="back-button" aria-label="Zurück">← Zurück</button>
+      <div class="timer-card">
+        <p id="timerTitle" class="timer-kicker"></p>
+        <div id="timerDisplay" class="timer-display">00:30</div>
+        <p id="timerHint" class="timer-hint"></p>
+        <div class="timer-actions">
+          <button id="playPauseBtn" class="primary-btn">Start</button>
+          <button id="resetBtn" class="secondary-btn">Neu</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
 </body>
 </html>
