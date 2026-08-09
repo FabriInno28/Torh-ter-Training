@@ -1,0 +1,12 @@
+{
+  "name": "KEEPER 10",
+  "short_name": "KEEPER 10",
+  "description": "10 Minuten Torhütertraining für 10 bis 14 Jahre.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#101217",
+  "theme_color": "#101217",
+  "icons": [
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
