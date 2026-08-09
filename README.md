@@ -1,19 +1,23 @@
-# KEEPER 10 – Prototype v4
+# KEEPER 10 – Final Test Version
 
-Mobile-first, offline-capable goalkeeper training app for ages 10–14.
+Erste hochwertige Testversion mit zwei echten 10-Minuten-Sessions:
 
-## Product logic
-- 6 goalkeeper worlds: TOR, RAUM, BALL, BEWEGUNG, AUGEN, KOPF
-- 3 learning stages per world: START, PLUS, MATCH
-- 18 sessions total
-- 3 connected exercises per session (54 exercises)
-- setup filter: solo, ball + wall, helper, goal + helper
-- interval timer, optional sound, CSS/SVG motion demos
-- local-only completion and difficulty feedback
-- no login, points, streaks, rankings or external dependencies
+1. NUR ICH – READY!, MOVE & SET, SPRING · LAND · READY
+2. TENNISBALL – DROP, HOCH & HIN, CRAZY BOUNCE
 
-## Run
-Serve the folder with any static web server or publish the folder contents to the root of a GitHub Pages repository.
+Features:
+- Mobile-first
+- GitHub Pages tauglich
+- Offline/PWA nach erstem Laden
+- Keine Frameworks oder externen Abhängigkeiten
+- Animierte Übungsdarstellungen
+- Intervalltimer
+- Zufällige Sprachkommandos bei MOVE & SET
+- Visuelle Kommandos als Fallback
+- Ton ein/aus
 
-## Training design basis
-The prototype follows modern goalkeeper principles such as set position and positioning, trajectory reading, handling high balls, 1v1 decisions, distribution, explosiveness integrated into goalkeeper actions, and defensive/offensive transitions. It is a coaching aid, not a substitute for age-appropriate supervision and club coaching.
+## GitHub Pages
+Alle Dateien ins Root des Repositories laden. Pages aus `main` / `/ (root)` publizieren.
+
+## Test
+Besonders auf iPhone/iPad Safari testen. Sprachkommandos benötigen bei mobilen Browsern zunächst eine Nutzerinteraktion, die durch `Timer starten` gegeben ist. Wenn keine passende Stimme verfügbar ist, bleiben die visuellen Kommandos aktiv.

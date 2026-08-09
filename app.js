@@ -1,601 +1,227 @@
-(() => {
-  'use strict';
-
-  const app = document.getElementById('app');
-  const STORAGE_KEY = 'keeper10-v2';
-  let DATA = null;
-  let route = { page: 'home' };
-  let timer = null;
-  let soundOn = true;
-  let activeSession = null;
-  let exerciseIndex = 0;
-  let timerState = null;
-
-  const state = loadState();
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : { completed: {}, feedback: {}, lastSession: null, preferredSetup: null };
-    } catch (_) {
-      return { completed: {}, feedback: {}, lastSession: null, preferredSetup: null };
-    }
-  }
-
-  function saveState() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
-  }
-
-  function esc(s='') {
-    return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  }
-
-  function world(id) { return DATA.worlds.find(w => w.id === id); }
-  function level(id) { return DATA.levels.find(l => l.id === id); }
-  function session(id) { return DATA.sessions.find(s => s.id === id); }
-  function sessionsForWorld(worldId) { return DATA.sessions.filter(s => s.world === worldId); }
-
-  function compatSetups(setup) {
-    const map = {
-      solo: ['solo'],
-      wall: ['wall','solo'],
-      helper: ['helper','solo'],
-      goal: ['goal','helper','solo']
-    };
-    return map[setup] || ['solo','wall','helper','goal'];
-  }
-
-  function setupLabel(id) {
-    const s = DATA.setups.find(x => x.id === id);
-    return s ? s.label : id;
-  }
-
-  function completedCount(sessionId) { return Number(state.completed?.[sessionId] || 0); }
-
-  function go(page, params={}) {
-    stopTimer();
-    route = { page, ...params };
-    history.replaceState(null, '', `#${page}${params.id ? '/' + params.id : ''}`);
-    render();
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }
-
-  function topbar(light=false) {
-    return `
-      <div class="topbar">
-        <button class="brand ghost-brand" data-go="home" aria-label="Zur Startseite">
-          <span class="brand-mark">K10</span>
-          <span>KEEPER 10<small>Train like a keeper</small></span>
-        </button>
-        <button class="icon-btn" data-go="info" aria-label="Über KEEPER 10">i</button>
-      </div>`;
-  }
-
-  function bottomNav(active='train') {
-    return `
-      <nav class="bottom-nav" aria-label="Hauptnavigation">
-        <button class="nav-btn ${active==='train'?'active':''}" data-go="setup"><span>▶</span><span>Trainieren</span></button>
-        <button class="nav-btn ${active==='worlds'?'active':''}" data-go="worlds"><span>◫</span><span>Welten</span></button>
-        <button class="nav-btn ${active==='progress'?'active':''}" data-go="progress"><span>○</span><span>Mein Weg</span></button>
-      </nav>`;
-  }
-
-  function keeperSvg(className='keeper-svg') {
-    return `
-    <svg class="${className}" viewBox="0 0 150 250" aria-hidden="true">
-      <g>
-        <ellipse cx="76" cy="234" rx="43" ry="7" fill="rgba(0,0,0,.16)"/>
-        <path d="M58 151 L49 205 Q47 218 55 226 L66 225 L70 177 L83 177 L87 225 L99 226 Q106 218 102 205 L94 151Z" fill="#15171c"/>
-        <path d="M51 223 L66 222 L70 234 L45 234 Q43 228 51 223Z" fill="#111318"/>
-        <path d="M87 222 L101 223 Q109 229 106 234 L83 234Z" fill="#111318"/>
-        <path d="M56 91 Q75 78 96 91 L101 154 Q79 165 53 154Z" fill="#f7c948" stroke="#111318" stroke-width="4"/>
-        <path d="M56 96 L99 96" stroke="#111318" stroke-width="8" opacity=".86"/>
-        <text x="77" y="134" text-anchor="middle" font-size="36" font-weight="900" fill="#111318" font-family="Arial">1</text>
-        <path d="M56 99 L33 135 Q28 143 35 148 Q41 152 47 144 L67 117Z" fill="#f7c948" stroke="#111318" stroke-width="4"/>
-        <path d="M98 99 L120 133 Q126 141 119 147 Q113 152 107 144 L88 117Z" fill="#f7c948" stroke="#111318" stroke-width="4"/>
-        <circle cx="32" cy="148" r="8" fill="#f2b78d" stroke="#111318" stroke-width="3"/>
-        <circle cx="122" cy="148" r="8" fill="#f2b78d" stroke="#111318" stroke-width="3"/>
-        <rect x="26" y="143" width="13" height="12" rx="5" fill="#d9eef4" stroke="#111318" stroke-width="2"/>
-        <rect x="116" y="143" width="13" height="12" rx="5" fill="#d9eef4" stroke="#111318" stroke-width="2"/>
-        <circle cx="77" cy="64" r="27" fill="#f2b78d" stroke="#111318" stroke-width="4"/>
-        <path d="M53 58 Q55 31 77 32 Q102 31 102 57 Q91 47 80 49 Q67 42 53 58Z" fill="#4d3328"/>
-        <circle cx="68" cy="66" r="2.6" fill="#111318"/><circle cx="87" cy="66" r="2.6" fill="#111318"/>
-        <path d="M70 77 Q77 82 85 77" fill="none" stroke="#8d533d" stroke-width="2.5" stroke-linecap="round"/>
-      </g>
-    </svg>`;
-  }
-
-  function serverSvg() {
-    return `
-    <svg class="server-svg" viewBox="0 0 120 220" aria-hidden="true">
-      <g>
-        <ellipse cx="60" cy="207" rx="35" ry="6" fill="rgba(0,0,0,.14)"/>
-        <circle cx="61" cy="55" r="23" fill="#d79e79" stroke="#111318" stroke-width="4"/>
-        <path d="M39 51 Q43 31 63 31 Q82 31 84 51 Q70 43 57 45 Q48 41 39 51Z" fill="#302820"/>
-        <path d="M43 85 Q60 75 79 85 L84 143 Q61 152 38 143Z" fill="#242832" stroke="#111318" stroke-width="4"/>
-        <path d="M39 94 L21 132" stroke="#242832" stroke-width="13" stroke-linecap="round"/>
-        <path d="M80 94 L101 131" stroke="#242832" stroke-width="13" stroke-linecap="round"/>
-        <path d="M45 143 L38 199" stroke="#111318" stroke-width="15" stroke-linecap="round"/>
-        <path d="M75 143 L82 199" stroke="#111318" stroke-width="15" stroke-linecap="round"/>
-      </g>
-    </svg>`;
-  }
-
-  function ballSvg() {
-    return `
-    <svg class="ball-svg" viewBox="0 0 50 50" aria-hidden="true">
-      <circle cx="25" cy="25" r="22" fill="#fffdf7" stroke="#111318" stroke-width="3"/>
-      <path d="M25 14l8 6-3 9H20l-3-9z" fill="#111318"/>
-      <path d="M25 14V4M33 20l9-4M30 29l7 9M20 29l-7 9M17 20l-9-4" stroke="#111318" stroke-width="2"/>
-    </svg>`;
-  }
-
-  function heroArt() {
-    return `
-      <svg class="hero-art" viewBox="0 0 520 350" aria-hidden="true">
-        <path d="M30 306 C112 260 189 294 276 245 C353 202 421 205 500 171" fill="none" stroke="rgba(17,19,24,.16)" stroke-width="4" stroke-dasharray="10 13"/>
-        <rect x="331" y="73" width="153" height="185" rx="6" fill="none" stroke="#111318" stroke-width="10"/>
-        <path d="M331 90h153M349 73v185M380 73v185M415 73v185M450 73v185M331 121h153M331 155h153M331 190h153M331 224h153" stroke="#111318" stroke-width="2" opacity=".18"/>
-        <g transform="translate(120 35) scale(1.08)">${keeperSvg('hero-keeper').replace('class="hero-keeper"','class="hero-keeper"')}</g>
-        <circle cx="421" cy="115" r="25" fill="#fffdf7" stroke="#111318" stroke-width="5"/><path d="M421 100l9 7-3 10h-12l-4-10z" fill="#111318"/>
-      </svg>`;
-  }
-
-  function home() {
-    const last = state.lastSession ? session(state.lastSession) : null;
-    const featured = last || session('tor-start');
-    return `
-      <div class="app-shell">
-        ${topbar()}
-        <section class="page">
-          <div class="hero">
-            <div class="hero-copy">
-              <p class="eyebrow">Für Keeper von ${esc(DATA.product.age)} Jahren</p>
-              <div class="hero-title">KEEPER<span>10</span></div>
-              <p>${esc(DATA.product.promise)} Kein Wochenplan. Du trainierst das, was du heute wirklich machen kannst.</p>
-            </div>
-            ${heroArt()}
-            <div class="hero-actions">
-              <button class="primary" data-go="setup">Training starten <span>→</span></button>
-              ${last ? `<button class="secondary" data-session="${esc(last.id)}">Weiter: ${esc(last.title)}</button>` : `<button class="secondary" data-go="worlds">6 Keeper Welten ansehen</button>`}
-            </div>
-          </div>
-
-          <div class="section">
-            <div class="section-head"><div><p class="eyebrow">Heute</p><h2>Was hast du?</h2></div><p>Die App zeigt nur passende Einheiten.</p></div>
-            <div class="setup-grid">
-              ${DATA.setups.map(s => `
-                <button class="setup-card" style="--setup:${s.color}" data-setup="${s.id}">
-                  <span class="setup-icon">${s.icon}</span>
-                  <h3>${esc(s.label)}</h3><p>${esc(s.hint)}</p>
-                </button>`).join('')}
-            </div>
-          </div>
-
-          <div class="section">
-            <div class="section-head"><div><p class="eyebrow">Ein Fokus</p><h2>6 Keeper Welten</h2></div><p>Technik, Wahrnehmung und Entscheidung gehören zusammen.</p></div>
-            <div class="world-grid">
-              ${DATA.worlds.map(w => worldCard(w)).join('')}
-            </div>
-          </div>
-
-          <div class="section">
-            <div class="section-head"><div><p class="eyebrow">Golden Master</p><h2>${esc(featured.title)}</h2></div><p>${esc(level(featured.level).label)} · ${esc(setupLabel(featured.setup))}</p></div>
-            ${sessionCard(featured)}
-          </div>
-        </section>
-        ${bottomNav('train')}
-      </div>`;
-  }
-
-  function worldCard(w) {
-    const count = sessionsForWorld(w.id).reduce((n,s)=>n+completedCount(s.id),0);
-    return `
-      <button class="world-card" style="--accent:${w.accent}" data-world="${w.id}">
-        <div class="world-icon">${w.icon}</div>
-        <div><span class="world-name">${esc(w.title)}</span><strong>${esc(w.claim)}</strong><p>${esc(w.description)}</p></div>
-        <div class="world-foot"><span>3 Sessions</span>${count ? `<span>${count}× trainiert</span>` : `<span>Start · Plus · Match</span>`}</div>
-      </button>`;
-  }
-
-  function setupPage() {
-    return `
-      <div class="app-shell">
-        ${topbar()}
-        <section class="page">
-          <div class="choice-hero">
-            <p class="eyebrow">Dein Training passt sich an</p>
-            <h1>Was hast du heute?</h1>
-            <p class="lead">Wähle dein Setup. Du bekommst nur Sessions, die jetzt wirklich funktionieren.</p>
-          </div>
-          <div class="setup-large">
-            ${DATA.setups.map(s => `
-              <button class="setup-choice" data-setup="${s.id}">
-                <span class="setup-icon" style="--setup:${s.color};background:${s.color}">${s.icon}</span>
-                <span><h3>${esc(s.label)}</h3><p>${esc(s.hint)}</p></span><strong>→</strong>
-              </button>`).join('')}
-          </div>
-        </section>
-        ${bottomNav('train')}
-      </div>`;
-  }
-
-  function setupResults(setupId) {
-    const allowed = compatSetups(setupId);
-    const sessions = DATA.sessions.filter(s => allowed.includes(s.setup));
-    state.preferredSetup = setupId; saveState();
-    return `
-      <div class="app-shell light">
-        ${topbar(true)}
-        <section class="page">
-          <div class="back-row"><button class="back-btn" data-go="setup" aria-label="Zurück">←</button><div><p class="eyebrow">${esc(setupLabel(setupId))}</p><h2>Deine Sessions</h2></div></div>
-          <div class="kicker-strip">
-            ${DATA.worlds.map(w => `<button class="pill" data-filter-world="${w.id}">${w.title}</button>`).join('')}
-          </div>
-          <div class="session-list" data-session-list>
-            ${sessions.map(sessionCard).join('')}
-          </div>
-        </section>
-        ${bottomNav('train')}
-      </div>`;
-  }
-
-  function worldsPage() {
-    return `
-      <div class="app-shell">
-        ${topbar()}
-        <section class="page">
-          <p class="eyebrow">Deine Ausbildung</p>
-          <h1>6 Keeper Welten.</h1>
-          <p class="lead">Jede Welt hat drei Stufen. START für saubere Grundlagen. PLUS für Bewegung und Tempo. MATCH für echte Entscheidungen.</p>
-          <div class="world-grid world-grid-large">${DATA.worlds.map(worldCard).join('')}</div>
-        </section>
-        ${bottomNav('worlds')}
-      </div>`;
-  }
-
-  function worldPage(worldId) {
-    const w = world(worldId);
-    const sessions = sessionsForWorld(worldId);
-    return `
-      <div class="app-shell light">
-        ${topbar(true)}
-        <section class="page">
-          <div class="back-row"><button class="back-btn" data-go="worlds">←</button><div><p class="eyebrow">Keeper Welt</p><h2>${esc(w.title)}</h2></div></div>
-          <div class="world-hero" style="--accent:${w.accent}">
-            <div class="world-hero-icon">${w.icon}</div>
-            <div><p class="eyebrow">${esc(w.claim)}</p><h1>${esc(w.title)}</h1><p>${esc(w.description)}</p></div>
-          </div>
-          <div class="level-path">
-            ${sessions.map(s => levelSessionCard(s)).join('')}
-          </div>
-        </section>
-        ${bottomNav('worlds')}
-      </div>`;
-  }
-
-  function levelSessionCard(s) {
-    const l = level(s.level), done = completedCount(s.id), w = world(s.world);
-    return `
-      <button class="level-card" style="--accent:${w.accent}" data-session="${s.id}">
-        <div class="level-badge">${l.label}</div>
-        <div class="level-card-copy"><h3>${esc(s.title)}</h3><p>${esc(l.meaning)}</p><div class="meta-row"><span class="meta">${esc(setupLabel(s.setup))}</span><span class="meta">${s.minutes} Min</span>${done?`<span class="meta">${done}× gemacht</span>`:''}</div></div>
-        <div class="session-arrow">→</div>
-      </button>`;
-  }
-
-  function sessionCard(s) {
-    const w = world(s.world), l = level(s.level), done = completedCount(s.id);
-    return `
-      <button class="session-card" style="--accent:${w.accent}" data-session="${s.id}">
-        <span class="session-visual">${s.icon}</span>
-        <span><h3>${esc(s.title)}</h3><p>${esc(s.tagline)}</p><span class="meta-row"><span class="meta">${w.title}</span><span class="meta">${l.label}</span><span class="meta">${esc(setupLabel(s.setup))}</span>${done?`<span class="meta">${done}×</span>`:''}</span></span>
-        <span class="session-arrow">→</span>
-      </button>`;
-  }
-
-  function sessionIntro(sessionId) {
-    const s = session(sessionId), w = world(s.world), l = level(s.level);
-    const siblings = sessionsForWorld(s.world);
-    return `
-      <div class="app-shell light">
-        ${topbar(true)}
-        <section class="page">
-          <div class="back-row"><button class="back-btn" data-world="${w.id}">←</button><div><p class="eyebrow">${w.title} · ${l.label}</p></div></div>
-          <article class="session-intro" style="--accent:${w.accent}">
-            <div class="session-cover">
-              <div><p class="eyebrow">${esc(setupLabel(s.setup))} · ${s.minutes} Minuten</p><h1>${esc(s.title)}</h1><p class="tagline">${esc(s.tagline)}</p></div>
-              <div class="big-icon">${s.icon}</div>
-            </div>
-            <div class="intro-body">
-              <div class="why-box"><b>WARUM DAS ZÄHLT</b><p>${esc(s.why)}</p></div>
-              <div class="timeline">
-                ${s.exercises.map((e,i)=>`<div class="timeline-item"><span class="timeline-no">${i+1}</span><span><h3>${esc(e.title)}</h3><p>${esc(e.why)}</p></span><span class="timeline-time">${esc(e.rhythm)}</span></div>`).join('')}
-              </div>
-              <div class="level-selector">
-                ${siblings.map(x => `<button class="level-btn ${x.id===s.id?'active':''}" data-session="${x.id}">${level(x.level).label}</button>`).join('')}
-              </div>
-              <button class="primary" data-start-session="${s.id}">Los. 10 Minuten. <span>→</span></button>
-            </div>
-          </article>
-        </section>
-      </div>`;
-  }
-
-  function trainingPage(sessionId, idx=0) {
-    activeSession = session(sessionId); exerciseIndex = idx;
-    const s = activeSession, e = s.exercises[idx], w = world(s.world);
-    timerState = initTimerState(e);
-    return `
-      <div class="training" style="--accent:${w.accent}">
-        <header class="training-head">
-          <button class="close-btn" data-session="${s.id}" aria-label="Training schliessen">×</button>
-          <div class="training-title"><b>${esc(s.title)}</b><span>${w.title} · ${level(s.level).label}</span></div>
-          <button class="sound-btn" data-sound aria-label="Ton an oder aus">${soundOn?'♪':'×'}</button>
-        </header>
-        <div class="progress-track"><div class="progress-fill" style="width:${((idx)/s.exercises.length)*100}%"></div></div>
-        <section class="exercise-stage">
-          ${animationCard(e)}
-          <div class="exercise-info">
-            <div class="exercise-copy">
-              <div><p class="step-kicker">Übung ${idx+1} von ${s.exercises.length}</p><h2>${esc(e.title)}</h2></div>
-              <div class="timer-chip"><span class="time" data-timer-display>${formatTime(e.work)}</span><small data-phase-label>Runde 1 / ${e.rounds}</small></div>
-            </div>
-            <div class="cues">${e.cues.map((c,i)=>`<div class="cue"><b>${i===0?'Achte auf':'+'}</b>${esc(c)}</div>`).join('')}</div>
-            <details class="howto"><summary>So geht's</summary><ol>${e.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><p><strong>Warum:</strong> ${esc(e.why)}</p></details>
-            <div class="variant-note">${esc(e.variant)}</div>
-            <div class="timer-controls">
-              <button class="timer-main" data-timer-main>Timer starten · ${esc(e.rhythm)}</button>
-              <button class="next-btn" data-next-exercise aria-label="Übung überspringen">→</button>
-            </div>
-          </div>
-        </section>
-      </div>`;
-  }
-
-  function animationCard(e) {
-    const scene = esc(e.scene || 'goal');
-    const anim = esc(e.animation || 'set');
-    return `
-      <div class="animation-card scene ${scene} anim-${anim}" data-animation>
-        <span class="sky-glow"></span><span class="pitch-line"></span><span class="goal-frame"></span><span class="wall-mark"></span>
-        ${keeperSvg()}${serverSvg()}${ballSvg()}
-        <span class="motion-arrow">›</span>
-        <button class="replay-btn" data-replay>↻ Animation</button>
-      </div>`;
-  }
-
-  function initTimerState(e) {
-    return { running:false, phase:'work', round:1, remaining:e.work, totalRounds:e.rounds, work:e.work, rest:e.rest, finished:false };
-  }
-
-  function startPauseTimer() {
-    if (!timerState || timerState.finished) {
-      nextExercise();
-      return;
-    }
-    if (timerState.running) { stopIntervalOnly(); updateTimerUI(); return; }
-    timerState.running = true;
-    beep(520, .06);
-    updateTimerUI();
-    timer = setInterval(tick, 1000);
-  }
-
-  function tick() {
-    if (!timerState?.running) return;
-    timerState.remaining -= 1;
-    if (timerState.remaining <= 0) advanceTimerPhase();
-    updateTimerUI();
-  }
-
-  function advanceTimerPhase() {
-    if (timerState.phase === 'work') {
-      if (timerState.round >= timerState.totalRounds) {
-        timerState.running = false; timerState.finished = true; timerState.remaining = 0;
-        stopIntervalOnly(); beep(760,.08); setTimeout(()=>beep(980,.08),110); return;
+const SESSIONS = {
+  solo: {
+    id:'solo', label:'NUR ICH', title:'Keeper Ready', subtitle:'Bewegen. Stoppen. Bereit sein.', icon:'↔', equipment:'Kein Material', minutes:10,
+    promise:'Du trainierst die drei Grundlagen vor fast jeder Parade: Grundstellung, kurze Fussarbeit und kontrolliertes Landen.',
+    takeaway:'Bereit ist schneller als hektisch.',
+    exercises:[
+      {
+        title:'READY!', subtitle:'Finde deine Grundstellung auf ein Signal.', visual:'ready', rounds:3, work:30, rest:15,
+        steps:['Stell dich locker hin.','Beim Signal sofort in die Grundstellung.','Halte die Position zwei Sekunden.','Dann wieder locker und neu bereit.'],
+        cues:['Füsse etwa schulterbreit.','Knie weich. Gewicht leicht nach vorne.','Hände vor dem Körper. Locker bleiben.'],
+        why:'Deine Grundstellung ist der Start für jede Parade.', audio:'ready'
+      },
+      {
+        title:'MOVE & SET', subtitle:'Die App sagt dir, wohin du dich bewegst.', visual:'move', rounds:4, work:30, rest:15,
+        steps:['Starte in Grundstellung.','Bei LINKS oder RECHTS zwei kleine Seitwärtsschritte.','Bei STOPP sofort ruhig in Grundstellung.','Warte auf das nächste Kommando.'],
+        cues:['Füsse nicht kreuzen.','Kleine, schnelle Schritte.','Vor jeder neuen Aktion wieder stabil stehen.'],
+        why:'Schnell bewegen ist gut. Im richtigen Moment stoppen ist besser.', audio:'directions'
+      },
+      {
+        title:'SPRING · LAND · READY', subtitle:'Nach jeder Landung sofort wieder Torhüter sein.', visual:'jump', rounds:3, work:35, rest:20,
+        steps:['Starte in Grundstellung.','Spring klein und explosiv nach oben.','Lande weich auf beiden Füssen.','Finde sofort wieder deine Grundstellung.'],
+        cues:['Nicht maximal hoch springen.','Leise und stabil landen.','Knie über den Füssen. Sofort wieder bereit.'],
+        why:'Nicht die Sprunghöhe entscheidet. Wichtig ist, wie schnell du nach der Landung wieder bereit bist.', audio:'beep'
       }
-      timerState.phase = 'rest'; timerState.remaining = timerState.rest; beep(420,.07);
-    } else {
-      timerState.phase = 'work'; timerState.round += 1; timerState.remaining = timerState.work; beep(650,.07);
-    }
-  }
-
-  function updateTimerUI() {
-    const display = document.querySelector('[data-timer-display]');
-    const phase = document.querySelector('[data-phase-label]');
-    const main = document.querySelector('[data-timer-main]');
-    if (!display || !phase || !main || !timerState) return;
-    display.textContent = formatTime(timerState.remaining);
-    if (timerState.finished) {
-      phase.textContent = 'Geschafft';
-      main.textContent = exerciseIndex === activeSession.exercises.length - 1 ? 'Session abschliessen →' : 'Nächste Übung →';
-      main.classList.add('finished');
-    } else if (timerState.phase === 'rest') {
-      phase.textContent = `Pause · danach Runde ${timerState.round + 1}`;
-      main.textContent = timerState.running ? 'Pause läuft' : 'Weiter';
-    } else {
-      phase.textContent = `Runde ${timerState.round} / ${timerState.totalRounds}`;
-      main.textContent = timerState.running ? 'Pause' : (timerState.round === 1 && timerState.remaining === timerState.work ? 'Timer starten' : 'Weiter');
-    }
-  }
-
-  function nextExercise() {
-    stopTimer();
-    if (exerciseIndex < activeSession.exercises.length - 1) {
-      exerciseIndex += 1;
-      app.innerHTML = trainingPage(activeSession.id, exerciseIndex);
-      bind();
-      window.scrollTo(0,0);
-    } else {
-      completeSession(activeSession.id);
-    }
-  }
-
-  function stopIntervalOnly() {
-    if (timer) { clearInterval(timer); timer = null; }
-    if (timerState) timerState.running = false;
-  }
-
-  function stopTimer() { stopIntervalOnly(); timerState = null; }
-
-  function beep(freq=600, duration=.08) {
-    if (!soundOn) return;
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      const ctx = beep.ctx || (beep.ctx = new AudioCtx());
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.frequency.value = freq; o.type = 'sine';
-      g.gain.setValueAtTime(.0001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(.07, ctx.currentTime + .01);
-      g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + duration);
-      o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + duration + .02);
-    } catch (_) {}
-  }
-
-  function formatTime(sec) {
-    const m = Math.floor(sec/60), s = Math.max(0,sec%60);
-    return m ? `${m}:${String(s).padStart(2,'0')}` : `0:${String(s).padStart(2,'0')}`;
-  }
-
-  function completeSession(id) {
-    stopTimer();
-    state.completed[id] = completedCount(id) + 1;
-    state.lastSession = id;
-    saveState();
-    route = { page:'complete', id };
-    render();
-  }
-
-  function completionPage(id) {
-    const s = session(id), w = world(s.world);
-    return `
-      <div class="app-shell">
-        ${topbar()}
-        <section class="page completion" style="--accent:${w.accent}">
-          <div class="completion-mark">✓</div>
-          <p class="eyebrow">${w.title} · ${level(s.level).label}</p>
-          <h1>Das war Keeperarbeit.</h1>
-          <p class="lead">Nicht weil alles perfekt war. Sondern weil du bewusst an einer echten Torhütersituation gearbeitet hast.</p>
-          <div class="takeaway"><b>NIMM DAS MIT</b><p>${esc(s.takeaway)}</p></div>
-          <p class="eyebrow">Wie war die Schwierigkeit?</p>
-          <div class="feedback-grid">
-            <button class="feedback-btn" data-feedback="easy"><span>↘</span>Zu leicht</button>
-            <button class="feedback-btn" data-feedback="right"><span>●</span>Genau richtig</button>
-            <button class="feedback-btn" data-feedback="hard"><span>↗</span>Noch schwierig</button>
-          </div>
-          <button class="primary" data-go="home">Zurück zu KEEPER 10</button>
-        </section>
-      </div>`;
-  }
-
-  function progressPage() {
-    return `
-      <div class="app-shell light">
-        ${topbar(true)}
-        <section class="page">
-          <p class="eyebrow">Kein Ranking. Nur dein Weg.</p>
-          <h1>Wo warst du schon?</h1>
-          <p class="lead">Hier siehst du nur, welche Keeper Welten du bereits ausprobiert hast. Kein Streak. Keine Punkte.</p>
-          <div class="progress-grid">
-            ${DATA.worlds.map(w => {
-              const sessions = sessionsForWorld(w.id), doneSessions = sessions.filter(s=>completedCount(s.id)>0).length, totalRuns=sessions.reduce((n,s)=>n+completedCount(s.id),0);
-              return `<button class="focus-card focus-click" style="--accent:${w.accent}" data-world="${w.id}"><div class="focus-top"><h3>${w.title} · ${w.claim}</h3><span>${doneSessions}/3 Sessions · ${totalRuns}× trainiert</span></div><div class="focus-bar"><div style="width:${(doneSessions/3)*100}%"></div></div></button>`;
-            }).join('')}
-          </div>
-          ${state.lastSession ? `<div class="section"><p class="eyebrow">Zuletzt</p>${sessionCard(session(state.lastSession))}</div>` : `<div class="empty-state"><div class="emoji">🧤</div><h3>Noch nichts gespeichert.</h3><p>Dein erster Eintrag entsteht automatisch nach einer abgeschlossenen Session.</p></div>`}
-        </section>
-        ${bottomNav('progress')}
-      </div>`;
-  }
-
-  function infoPage() {
-    return `
-      <div class="app-shell light">
-        ${topbar(true)}
-        <section class="page">
-          <div class="back-row"><button class="back-btn" data-go="home">←</button><div><p class="eyebrow">Die Idee</p><h2>Warum KEEPER 10?</h2></div></div>
-          <div class="info-sheet">
-            <h2>Kein Drill Katalog.</h2>
-            <p>KEEPER 10 denkt vom Spiel aus: Tor verteidigen, Raum verteidigen und Angriffe starten. Jede Session verbindet saubere Technik mit Wahrnehmung und Entscheidung.</p>
-            <h3>START</h3><p>Du verstehst eine Bewegung und kannst sie kontrolliert wiederholen.</p>
-            <h3>PLUS</h3><p>Tempo, Bewegung oder eine zusätzliche Information kommen dazu.</p>
-            <h3>MATCH</h3><p>Du weisst nicht alles vorher. Du musst sehen, entscheiden und handeln.</p>
-            <h3>Für 10–14 Jahre</h3><p>Qualität vor Ermüdung. Sprünge und Paraden werden kontrolliert aufgebaut. Bei Schmerzen wird gestoppt. Harte Nahdistanzschüsse und unnötige Kollisionen gehören nicht in diese App.</p>
-            <p class="source-note">Die Trainingsarchitektur orientiert sich an moderner Torhüterausbildung: Set Position und Positionierung, Flugbahnlesen, hohe Bälle, 1 gegen 1, Distribution sowie defensive/offensive Übergänge.</p>
-          </div>
-        </section>
-      </div>`;
-  }
-
-  function replayAnimation(btn) {
-    const card = btn.closest('[data-animation]');
-    if (!card) return;
-    const classes = [...card.classList];
-    const anim = classes.find(c=>c.startsWith('anim-'));
-    if (!anim) return;
-    card.classList.remove(anim); void card.offsetWidth; card.classList.add(anim);
-  }
-
-  function applyFeedback(value, btn) {
-    if (!route.id) return;
-    state.feedback[route.id] = value; saveState();
-    document.querySelectorAll('[data-feedback]').forEach(x=>x.classList.toggle('selected', x===btn));
-  }
-
-  function filterWorld(worldId, btn) {
-    const setupId = route.setup;
-    const allowed = compatSetups(setupId);
-    const list = DATA.sessions.filter(s=>allowed.includes(s.setup) && (!worldId || s.world===worldId));
-    const holder = document.querySelector('[data-session-list]');
-    if (holder) holder.innerHTML = list.length ? list.map(sessionCard).join('') : `<div class="empty-state"><div class="emoji">🧤</div><h3>Hier passt heute nichts.</h3><p>Wähle ein anderes Setup oder eine andere Keeper Welt.</p></div>`;
-    document.querySelectorAll('[data-filter-world]').forEach(x=>x.classList.toggle('active', x===btn));
-    bind(holder || document);
-  }
-
-  function bind(scope=document) {
-    scope.querySelectorAll('[data-go]').forEach(el => el.onclick = () => go(el.dataset.go));
-    scope.querySelectorAll('[data-setup]').forEach(el => el.onclick = () => { route = {page:'results', setup:el.dataset.setup}; render(); });
-    scope.querySelectorAll('[data-world]').forEach(el => el.onclick = () => { route = {page:'world', id:el.dataset.world}; render(); window.scrollTo(0,0); });
-    scope.querySelectorAll('[data-session]').forEach(el => el.onclick = () => { route = {page:'session', id:el.dataset.session}; render(); window.scrollTo(0,0); });
-    scope.querySelectorAll('[data-start-session]').forEach(el => el.onclick = () => { route = {page:'training', id:el.dataset.startSession}; app.innerHTML = trainingPage(el.dataset.startSession,0); bind(); });
-    scope.querySelectorAll('[data-timer-main]').forEach(el => el.onclick = startPauseTimer);
-    scope.querySelectorAll('[data-next-exercise]').forEach(el => el.onclick = nextExercise);
-    scope.querySelectorAll('[data-sound]').forEach(el => el.onclick = () => { soundOn=!soundOn; el.textContent=soundOn?'♪':'×'; if(soundOn) beep(620,.05); });
-    scope.querySelectorAll('[data-replay]').forEach(el => el.onclick = () => replayAnimation(el));
-    scope.querySelectorAll('[data-feedback]').forEach(el => el.onclick = () => applyFeedback(el.dataset.feedback, el));
-    scope.querySelectorAll('[data-filter-world]').forEach(el => el.onclick = () => filterWorld(el.dataset.filterWorld, el));
-  }
-
-  function render() {
-    if (!DATA) return;
-    switch (route.page) {
-      case 'setup': app.innerHTML = setupPage(); break;
-      case 'results': app.innerHTML = setupResults(route.setup || state.preferredSetup || 'solo'); break;
-      case 'worlds': app.innerHTML = worldsPage(); break;
-      case 'world': app.innerHTML = worldPage(route.id || 'tor'); break;
-      case 'session': app.innerHTML = sessionIntro(route.id || 'tor-start'); break;
-      case 'training': app.innerHTML = trainingPage(route.id || 'tor-start',0); break;
-      case 'complete': app.innerHTML = completionPage(route.id || state.lastSession || 'tor-start'); break;
-      case 'progress': app.innerHTML = progressPage(); break;
-      case 'info': app.innerHTML = infoPage(); break;
-      default: app.innerHTML = home();
-    }
-    bind();
-  }
-
-  async function boot() {
-    try {
-      const res = await fetch('./sessions.json', { cache:'no-store' });
-      if (!res.ok) throw new Error('sessions.json konnte nicht geladen werden');
-      DATA = await res.json();
-      render();
-      if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-        navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+    ]
+  },
+  tennis: {
+    id:'tennis', label:'TENNISBALL', title:'Augen an', subtitle:'Sehen. Bewegen. Sichern.', icon:'●', equipment:'1 Tennisball', minutes:10,
+    promise:'Der Tennisball macht die Flugbahn kleiner und schneller. Du trainierst Reaktion, Orientierung und den ersten Schritt zum Ball.',
+    takeaway:'Nicht nur greifen. Geh mit deinem Körper zum Ball.',
+    exercises:[
+      {
+        title:'DROP', subtitle:'Schnell sehen. Körper zum Ball.', visual:'drop', rounds:3, work:35, rest:20,
+        steps:['Halte den Tennisball auf Schulterhöhe.','Lass ihn seitlich vor dir fallen.','Er darf einmal aufspringen.','Fang ihn vor dem zweiten Bodenkontakt.'],
+        cues:['5 Versuche links, dann rechts.','Blick bleibt am Ball.','Erster Schritt zum Ball. Nicht nur mit der Hand greifen.'],
+        why:'Du trainierst, eine kurze Flugbahn früh zu sehen und deinen Körper zum Ball zu bringen.', audio:'beep'
+      },
+      {
+        title:'HOCH & HIN', subtitle:'Wirf. Bewege dich. Komm unter den Ball.', visual:'high', rounds:3, work:40, rest:20,
+        steps:['Wirf den Ball selbst etwas nach links oder rechts hoch.','Mach sofort kleine Schritte zum Ball.','Komm stabil unter den Ball.','Fang ihn mit beiden Händen und werde wieder READY.'],
+        cues:['Nicht stehen und warten.','Flugbahn anschauen.','Unter dem Ball stabil werden.'],
+        why:'Gute hohe Bälle beginnen mit Flugbahn lesen und sauberer Fussarbeit.', audio:'beep'
+      },
+      {
+        title:'CRAZY BOUNCE', subtitle:'Du weisst nicht genau, wohin er springt.', visual:'bounce', rounds:3, work:40, rest:20,
+        steps:['Wirf den Tennisball schräg vor dir auf den Boden.','Lass den Aufprall bewusst etwas unberechenbar sein.','Reagiere erst nach dem Aufsprung.','Geh zum Ball und sichere ihn.'],
+        cues:['Sicherer, ebener Untergrund.','Nicht vorher raten.','Erster Schritt schnell. Danach ruhig sichern.'],
+        why:'Der Aufprall verändert die Flugbahn. Du musst neu sehen und neu handeln.', audio:'beep'
       }
-    } catch (err) {
-      app.innerHTML = `<div class="app-shell"><section class="page"><div class="empty-state"><div class="emoji">🧤</div><h2>KEEPER 10 konnte nicht starten.</h2><p>${esc(err.message)}</p><p>Auf GitHub Pages oder über einen lokalen Webserver öffnen.</p></div></section></div>`;
-    }
+    ]
   }
+};
 
-  boot();
-})();
+const app = document.querySelector('#app');
+let state={screen:'home',session:null,exercise:0,timer:null,audio:true};
+let interval=null, commandTimeout=null, synthVoice=null, audioCtx=null;
+
+function keeperSVG(pose='ready'){
+  const jump = pose==='jump';
+  const leanL = pose==='left';
+  const leanR = pose==='right';
+  const tx = leanL?-22:leanR?22:0;
+  const ty = jump?-28:0;
+  return `<svg class="keeper-svg" viewBox="0 0 420 520" role="img" aria-label="Illustrierter Torhüter in Grundstellung">
+    <g transform="translate(${tx} ${ty})">
+      <ellipse cx="210" cy="486" rx="105" ry="18" fill="rgba(0,0,0,.35)"/>
+      <path class="skin stroke" d="M183 91c0-32 54-32 54 0v29c0 20-11 34-27 34s-27-14-27-34z"/>
+      <path class="hair stroke" d="M179 94c4-40 63-48 68-5-8-15-24-22-43-17-11 3-18 10-25 22z"/>
+      <path class="jersey stroke" d="M145 159c24-16 106-16 130 0l25 126-42 18-13-70-4 112h-62l-4-112-13 70-42-18z"/>
+      <rect class="stripe" x="173" y="151" width="18" height="166" rx="4"/><rect class="stripe" x="210" y="148" width="18" height="169" rx="4"/><rect class="stripe" x="247" y="153" width="15" height="153" rx="4"/>
+      <text class="k10" x="198" y="200">K10</text>
+      <path class="skin stroke" d="M145 170l-56 76 30 20 51-56z"/><path class="skin stroke" d="M275 170l56 76-30 20-51-56z"/>
+      <path class="glove" d="M82 242l37 5 9 26-16 24-35-22z"/><path class="glove" d="M338 242l-37 5-9 26 16 24 35-22z"/>
+      <path class="dark stroke" d="M175 310h70l27 68-46 16-16-48-16 48-46-16z"/>
+      <path class="skin stroke" d="M177 374l36 7-26 78-35-7z"/><path class="skin stroke" d="M243 374l-36 7 26 78 35-7z"/>
+      <path class="sock stroke" d="M151 443l37 7-3 48-43-6z"/><path class="sock stroke" d="M269 443l-37 7 3 48 43-6z"/>
+      <path class="boot stroke" d="M142 486l43 4 16 20h-69z"/><path class="boot stroke" d="M278 486l-43 4-16 20h69z"/>
+    </g>
+  </svg>`;
+}
+
+function tennisBall(){
+  return `<div class="tennis-ball" aria-hidden="true"></div>`;
+}
+
+function visual(type, active=false, cue=''){
+  let pose='ready', arrows='';
+  if(type==='jump') pose='jump';
+  if(type==='move') arrows='<div class="motion-arrow left">←</div><div class="motion-arrow right">→</div>';
+  const ball = ['drop','high','bounce'].includes(type) ? tennisBall() : '';
+  return `<div class="session-visual visual-${type}">
+    <div class="flood"></div><div class="pitch"></div>
+    ${arrows}
+    <div class="session-figure-wrap">${keeperSVG(pose)}</div>
+    ${ball}
+    <div class="motion-path"></div>
+    <div class="visual-caption">${visualCaption(type)}</div>
+  </div>`;
+}
+function visualCaption(type){
+  return ({ready:'Signal → READY',move:'Kleine Schritte → STOPP',jump:'Spring → lande → READY',drop:'1 Aufsprung → sichern',high:'Wirf → bewegen → fangen',bounce:'Aufprall sehen → reagieren'})[type]||'';
+}
+
+function shell(content){return `<div class="shell"><div class="wrap"><header class="topbar"><div class="brand">KEEPER <span>10</span></div><div class="top-tools"><button class="round-btn" id="audioBtn" aria-label="Ton ein oder aus">${state.audio?'🔊':'🔇'}</button></div></header>${content}</div></div>`}
+
+function home(){
+  app.innerHTML=shell(`<section class="page">
+    <div class="card paper hero">
+      <span class="eyebrow">10 MINUTEN · TORHÜTER</span>
+      <h1>Du kannst jetzt anfangen.</h1>
+      <p>Wähle nur das, was du gerade zur Hand hast. KEEPER 10 baut daraus dein Training.</p>
+      <div class="hero-meta"><span class="meta">⏱ 10 Minuten</span><span class="meta">3 Aufgaben</span><span class="meta">10–14 Jahre</span></div>
+    </div>
+    <section class="section"><p class="section-label">Was hast du heute?</p>
+      <div class="setup-grid">
+        ${setupCard('solo','↔','NUR ICH','Kein Ball. Kein Material. Zwei Meter Platz reichen.','Sofort startklar')}
+        ${setupCard('tennis','●','TENNISBALL','Ein Tennisball. Sonst nichts. Reaktion und Flugbahn.','1 Hilfsmittel')}
+      </div>
+      <div class="note"><strong>Die Idee:</strong> Kein Wochenplan, den du verpassen kannst. Du trainierst die Situation, die heute möglich ist.</div>
+    </section>
+  </section>`);
+  bindGlobal();
+  document.querySelectorAll('[data-session]').forEach(b=>b.onclick=()=>openSession(b.dataset.session));
+}
+function setupCard(id,icon,title,text,foot){return `<button class="setup-card" data-session="${id}"><span class="arrow">→</span><div class="setup-icon">${icon}</div><h2>${title}</h2><p>${text}</p><div class="setup-foot"><strong>10 MIN</strong><span>·</span><span>3 Aufgaben</span><span>·</span><span>${foot}</span></div></button>`}
+
+function openSession(id){state.session=id;state.exercise=0;state.screen='intro';render();}
+function sessionIntro(){const s=SESSIONS[state.session];app.innerHTML=shell(`<section class="page">
+  <button class="back" id="backBtn">← Zur Auswahl</button>
+  <div class="session-intro-grid card">
+    <div class="content-card paper">
+      <span class="eyebrow">${s.label} · START</span>
+      <h1>${s.title}</h1><p class="sub">${s.subtitle}</p>
+      <div class="hero-meta"><span class="meta">⏱ ${s.minutes} Minuten</span><span class="meta">☰ 3 Aufgaben</span><span class="meta">${s.equipment}</span></div>
+      <div class="why"><strong>Heute lernst du:</strong><br>${s.promise}</div>
+      <button class="primary" id="startSession">Training starten <span>→</span></button>
+    </div>
+    ${visual(s.exercises[0].visual)}
+  </div>
+</section>`);bindGlobal();document.querySelector('#backBtn').onclick=home;document.querySelector('#startSession').onclick=()=>{state.screen='exercise';render()}}
+
+function exerciseScreen(){const s=SESSIONS[state.session],e=s.exercises[state.exercise];app.innerHTML=shell(`<section class="page">
+  <div class="exercise-top"><button class="back" id="backBtn">← Session</button><span class="exercise-count">Aufgabe ${state.exercise+1} von 3</span></div>
+  <div class="card">${visual(e.visual)}
+    <div class="content-card paper"><span class="eyebrow">${s.label} · ${e.rounds} × ${e.work} SEK.</span><h1>${state.exercise+1} · ${e.title}</h1><p class="sub">${e.subtitle}</p>
+      <div class="info-grid">
+        <div class="info-box"><h3>So geht’s</h3><ol class="steps">${e.steps.map((x,i)=>`<li><span class="badge-num">${i+1}</span><span>${x}</span></li>`).join('')}</ol></div>
+        <div class="info-box"><h3>Achte darauf</h3><ul class="cues">${e.cues.map(x=>`<li><span class="cue-dot">✓</span><span>${x}</span></li>`).join('')}</ul></div>
+      </div>
+      <div class="why"><strong>Warum?</strong> ${e.why}</div>
+      <button class="primary" id="timerStart">Timer starten <span>→</span></button>
+    </div>
+  </div>
+</section>`);bindGlobal();document.querySelector('#backBtn').onclick=()=>{state.screen='intro';render()};document.querySelector('#timerStart').onclick=startTimer;}
+
+function startTimer(){
+  const e=SESSIONS[state.session].exercises[state.exercise];
+  clearTimer();
+  state.timer={phase:'work',round:1,remaining:e.work,running:true};
+  state.screen='timer';renderTimer();
+  unlockAudio();
+  playStartSignal(e);
+  interval=setInterval(tick,1000);
+  if(['directions','ready'].includes(e.audio)) scheduleCommand();
+}
+function renderTimer(){
+  const e=SESSIONS[state.session].exercises[state.exercise],t=state.timer;
+  const total=t.phase==='work'?e.work:e.rest; const pct=Math.max(0,Math.min(100,100-(t.remaining/total*100)));
+  app.innerHTML=shell(`<section class="page"><div class="timer-panel">
+    <div class="exercise-top"><button class="back" id="stopTimer">← Beenden</button><span class="exercise-count">${e.title}</span></div>
+    <div class="timer-stage"><span class="timer-mode">${t.phase==='work'?'TRAINING':'PAUSE'}</span><span class="rounds">Runde ${t.round} / ${e.rounds}</span>
+      <div class="timer-ring" style="--progress:${pct}%"><span class="timer-number">${t.remaining}</span></div>
+      <div class="command"><span id="commandText"></span></div>
+    </div>
+    <div class="timer-controls"><button class="pause" id="pauseBtn">${t.running?'Pause':'Weiter'}</button><button class="skip" id="skipBtn">${t.phase==='work'?'Runde beenden':'Pause beenden'} →</button></div>
+    <p class="audio-note">${e.audio==='directions'?'Die Kommandos kommen zufällig. Ton an: Die App spricht. Ton aus: Das Signal erscheint weiterhin gross auf dem Bildschirm.':e.audio==='ready'?'READY kommt in unregelmässigen Abständen. Stell dich erst beim Signal in deine Grundstellung.':'Ein kurzes Signal markiert Start, Pause und Ende.'}</p>
+  </div></section>`);
+  bindGlobal();
+  document.querySelector('#stopTimer').onclick=()=>{clearTimer();state.screen='exercise';render()};
+  document.querySelector('#pauseBtn').onclick=togglePause; document.querySelector('#skipBtn').onclick=advancePhase;
+}
+function updateTimerUI(){const e=SESSIONS[state.session].exercises[state.exercise],t=state.timer;if(!t)return;const n=document.querySelector('.timer-number');if(n)n.textContent=t.remaining;const r=document.querySelector('.timer-ring');if(r){const total=t.phase==='work'?e.work:e.rest;const pct=100-(t.remaining/total*100);r.style.setProperty('--progress',`${pct}%`)} }
+function tick(){if(!state.timer?.running)return;state.timer.remaining--;updateTimerUI();if(state.timer.remaining<=0)advancePhase();}
+function advancePhase(){const e=SESSIONS[state.session].exercises[state.exercise],t=state.timer;if(!t)return;clearCommand();if(t.phase==='work'){
+    if(t.round>=e.rounds){finishExercise();return}
+    t.phase='rest';t.remaining=e.rest;beep(520,.13);speak('Pause');
+  }else{t.phase='work';t.round++;t.remaining=e.work;beep(760,.13);speak('Los');if(['directions','ready'].includes(e.audio))scheduleCommand();}
+  renderTimer();
+}
+function togglePause(){state.timer.running=!state.timer.running;if(!state.timer.running)clearCommand();else if(['directions','ready'].includes(SESSIONS[state.session].exercises[state.exercise].audio)&&state.timer.phase==='work')scheduleCommand();renderTimer();}
+function finishExercise(){clearTimer();beep(880,.18);const s=SESSIONS[state.session];if(state.exercise<s.exercises.length-1){state.exercise++;state.screen='exercise';render()}else{state.screen='finish';render()}}
+function clearTimer(){if(interval)clearInterval(interval);interval=null;clearCommand();}
+function clearCommand(){if(commandTimeout)clearTimeout(commandTimeout);commandTimeout=null;}
+
+function scheduleCommand(){clearCommand();const e=SESSIONS[state.session].exercises[state.exercise];if(!state.timer?.running||state.timer.phase!=='work'||!['directions','ready'].includes(e.audio))return;const delay=e.audio==='ready'?(2600+Math.random()*1600):(1200+Math.random()*1200);commandTimeout=setTimeout(()=>{const cmd=e.audio==='ready'?'READY':['LINKS','RECHTS','STOPP'][Math.floor(Math.random()*3)];showCommand(cmd);if(state.audio)speak(cmd.toLowerCase());scheduleCommand();},delay)}
+function showCommand(cmd){const el=document.querySelector('#commandText');if(!el)return;el.textContent=cmd;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),700)}
+function playStartSignal(e){beep(760,.14);if(state.audio){if(e.audio==='directions')speak('Los');else if(e.audio==='ready')speak('Ready');else speak('Los')}}
+
+function unlockAudio(){try{const A=window.AudioContext||window.webkitAudioContext;if(!audioCtx&&A)audioCtx=new A();if(audioCtx?.state==='suspended')audioCtx.resume()}catch(e){}}
+function beep(freq=700,dur=.12){if(!state.audio)return;try{unlockAudio();if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.18,audioCtx.currentTime+.015);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur+.02);}catch(e){}}
+function speak(text){if(!state.audio||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='de-CH';u.rate=.95;u.pitch=.9;u.volume=.9;if(synthVoice)u.voice=synthVoice;speechSynthesis.speak(u);}catch(e){}}
+function initVoice(){if(!('speechSynthesis'in window))return;const pick=()=>{const v=speechSynthesis.getVoices();synthVoice=v.find(x=>x.lang.toLowerCase().startsWith('de-ch'))||v.find(x=>x.lang.toLowerCase().startsWith('de'))||null};pick();speechSynthesis.onvoiceschanged=pick;}
+
+function finish(){const s=SESSIONS[state.session];app.innerHTML=shell(`<section class="page finish"><div class="finish-icon">✓</div><h1>Stark.<br>Das war’s.</h1><p>${s.takeaway}</p><div class="checks"><div class="check"><span>✓</span><span>3 Aufgaben abgeschlossen</span></div><div class="check"><span>✓</span><span>${s.equipment}</span></div><div class="check"><span>✓</span><span>Kein Punktesammeln. Nur besser trainieren.</span></div></div><button class="primary" id="again">Noch einmal</button><button class="secondary" id="homeBtn">Andere Session wählen</button></section>`);bindGlobal();document.querySelector('#again').onclick=()=>openSession(state.session);document.querySelector('#homeBtn').onclick=home;}
+
+function bindGlobal(){const b=document.querySelector('#audioBtn');if(b)b.onclick=()=>{state.audio=!state.audio;if(!state.audio){try{speechSynthesis.cancel()}catch(e){}}render()}}
+function render(){if(state.screen==='home')home();else if(state.screen==='intro')sessionIntro();else if(state.screen==='exercise')exerciseScreen();else if(state.screen==='timer')renderTimer();else finish();}
+
+// Visual tennis-ball animation CSS hook
+const style=document.createElement('style');style.textContent=`
+.tennis-ball{position:absolute;width:28px;height:28px;border-radius:50%;background:#d7ff2b;box-shadow:0 0 0 2px rgba(255,255,255,.2),0 0 24px rgba(215,255,43,.32);left:54%;bottom:130px;z-index:5}
+.tennis-ball:after{content:"";position:absolute;inset:5px;border:2px solid rgba(255,255,255,.72);border-left-color:transparent;border-right-color:transparent;border-radius:50%;transform:rotate(28deg)}
+.visual-drop .tennis-ball{animation:dropball 1.8s ease-in-out infinite}.visual-high .tennis-ball{animation:highball 2.2s ease-in-out infinite}.visual-bounce .tennis-ball{animation:bounceball 2s cubic-bezier(.4,0,.2,1) infinite}
+.motion-path{position:absolute;border:2px dashed rgba(255,197,20,.7);border-left:0;border-bottom:0;border-radius:50%;opacity:0}
+.visual-high .motion-path{opacity:1;width:180px;height:120px;left:48%;bottom:115px;transform:translateX(-50%) rotate(-18deg)}
+.visual-bounce .motion-path{opacity:1;width:180px;height:75px;left:47%;bottom:92px;transform:translateX(-50%) rotate(18deg)}
+@keyframes dropball{0%,15%{transform:translate(34px,-135px)}50%{transform:translate(-55px,70px)}65%{transform:translate(-35px,20px)}100%{transform:translate(0,0)}}
+@keyframes highball{0%{transform:translate(-10px,10px)}45%{transform:translate(-95px,-130px)}100%{transform:translate(-42px,0)}}
+@keyframes bounceball{0%{transform:translate(30px,-60px)}48%{transform:translate(-48px,58px) scale(.92)}62%{transform:translate(-80px,-20px)}100%{transform:translate(-25px,0)}}
+.visual-jump .keeper-svg{animation:keeperjump 1.8s ease-in-out infinite}.visual-move .keeper-svg{animation:keepermove 2.3s ease-in-out infinite}.visual-ready .keeper-svg{animation:keeperset 2.1s ease-in-out infinite}
+@keyframes keeperjump{0%,20%,100%{transform:translateY(0)}50%{transform:translateY(-24px)}65%{transform:translateY(0)}}
+@keyframes keepermove{0%,100%{transform:translateX(0)}30%{transform:translateX(-26px)}55%{transform:translateX(0)}80%{transform:translateX(26px)}}
+@keyframes keeperset{0%,25%,100%{transform:scale(1)}50%,75%{transform:scale(.98) translateY(4px)}}
+`;document.head.appendChild(style);
+
+initVoice();home();
+if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}
