@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080808">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>KEEPER10 · Nur ich</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=6">
+  <link rel="apple-touch-icon" href="./k10-icon-192.png">
+  <link rel="preload" as="image" href="./k10_bereit_ablauf_v6.jpg">
+  <link rel="stylesheet" href="./styles.css?v=6">
+</head>
+<body>
+<main class="app-shell">
+
+  <section id="startScreen" class="screen active start-screen">
+    <header class="brandbar">
+      <div class="brand">KEEPER<span>10</span></div>
+      <span class="master-label">NUR ICH · 10 MIN.</span>
+    </header>
+
+    <article class="hero-card">
+      <div class="eyebrow">TRAINING · NUR ICH</div>
+      <h1>Du. Dein Körper. 10 Minuten.</h1>
+      <p>Kein Ball. Kein Material. Nur wenig Platz. Drei Übungen, die dich als Torhüter schneller bereit machen.</p>
+      <div class="session-facts">
+        <span>3 Übungen</span><span>ca. 10 Min.</span><span>ohne Material</span>
+      </div>
+    </article>
+
+    <section class="level-section" aria-labelledby="levelTitle">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">DEINE STUFE</div>
+          <h2 id="levelTitle">Wie willst du heute trainieren?</h2>
+        </div>
+      </div>
+      <div class="level-grid">
+        <button class="level-card" data-level="start">
+          <span class="level-number">01</span>
+          <strong>START</strong>
+          <p>Bewegung zuerst sauber lernen.</p>
+          <span class="level-action">Auswählen →</span>
+        </button>
+        <button class="level-card" data-level="plus">
+          <span class="level-number">02</span>
+          <strong>PLUS</strong>
+          <p>Mehr Tempo. Mehr Variation.</p>
+          <span class="level-action">Auswählen →</span>
+        </button>
+        <button class="level-card" data-level="spielnah">
+          <span class="level-number">03</span>
+          <strong>SPIELNAH</strong>
+          <p>Nicht wissen, was als Nächstes kommt.</p>
+          <span class="level-action">Auswählen →</span>
+        </button>
+      </div>
+    </section>
+  </section>
+
+  <section id="overviewScreen" class="screen">
+    <button class="back-link" id="overviewBack">← Stufe ändern</button>
+    <header class="overview-head">
+      <span id="overviewLevel" class="level-pill"></span>
+      <h1>Deine 10 Minuten</h1>
+      <p id="overviewIntro"></p>
+    </header>
+    <div class="overview-list">
+      <article class="overview-item">
+        <img src="./k10_bereit_ablauf_v6.jpg" alt="Ablauf Bereit">
+        <div><span>01</span><h2>Bereit!</h2><p>Grundstellung im richtigen Moment.</p></div>
+      </article>
+      <article class="overview-item">
+        <img src="./k10_schritte_ablauf_v6.jpg" alt="Ablauf Schritte und Stopp">
+        <div><span>02</span><h2>Schritte &amp; Stopp</h2><p>Verschieben und rechtzeitig stehen.</p></div>
+      </article>
+      <article class="overview-item">
+        <img src="./k10_spring_ablauf_v6.jpg" alt="Ablauf Spring Land Bereit">
+        <div><span>03</span><h2>Spring · Land · Bereit</h2><p>Explosiv sein und stabil landen.</p></div>
+      </article>
+    </div>
+    <button id="startSessionBtn" class="primary-btn">Session starten</button>
+  </section>
+
+  <section id="exerciseScreen" class="screen">
+    <div class="screen-topline">
+      <button class="back-link" id="exerciseBack">← Übersicht</button>
+      <span id="exerciseProgress" class="progress-text"></span>
+    </div>
+    <article class="exercise-header">
+      <div class="badge-row"><span id="exerciseLevel" class="level-pill"></span><span id="exerciseNo" class="exercise-no"></span></div>
+      <h1 id="exerciseTitle"></h1>
+      <p id="exerciseDesc"></p>
+    </article>
+
+    <article class="media-card">
+      <div class="video-wrap">
+        <video id="exerciseVideo" playsinline muted loop preload="metadata"></video>
+        <button id="replayBtn" class="replay-btn" aria-label="Clip neu abspielen">↻ Video</button>
+      </div>
+      <img id="exerciseStoryboard" class="storyboard" src="" alt="">
+    </article>
+
+    <section class="coach-grid">
+      <article class="coach-card">
+        <div class="coach-label">SO GEHT'S</div>
+        <ol id="exerciseSteps"></ol>
+      </article>
+      <article class="coach-card">
+        <div class="coach-label">ACHTE DARAUF</div>
+        <ul id="exerciseFocus"></ul>
+      </article>
+    </section>
+
+    <aside class="why-card">
+      <span>WARUM?</span>
+      <p id="exerciseWhy"></p>
+    </aside>
+
+    <button id="beginExerciseBtn" class="primary-btn sticky-primary">Training starten</button>
+  </section>
+
+  <section id="trainingScreen" class="screen training-screen">
+    <div class="screen-topline training-topline">
+      <button class="back-link" id="trainingBack">← Übung</button>
+      <button id="soundBtn" class="sound-btn" aria-pressed="true">🔊 Ton</button>
+    </div>
+    <header class="training-head">
+      <div><span id="trainingLevel" class="level-pill"></span><span id="trainingExerciseNo" class="exercise-no"></span></div>
+      <h1 id="trainingTitle"></h1>
+    </header>
+
+    <div class="training-layout">
+      <div class="training-media">
+        <video id="trainingVideo" playsinline muted loop preload="auto"></video>
+      </div>
+      <div class="training-console">
+        <div id="roundLabel" class="round-label"></div>
+        <div id="signal" class="signal">BEREIT</div>
+        <div id="timerValue" class="timer-value">00:30</div>
+        <p id="trainingHint" class="training-hint"></p>
+        <button id="trainingMainBtn" class="primary-btn">Start</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="betweenScreen" class="screen between-screen">
+    <div class="between-kicker">GUT. WEITER.</div>
+    <h1 id="betweenTitle"></h1>
+    <p id="betweenText"></p>
+    <img id="betweenImage" src="" alt="">
+    <button id="nextExerciseBtn" class="primary-btn">Nächste Übung</button>
+  </section>
+
+  <section id="finishScreen" class="screen finish-screen">
+    <div class="finish-mark">K10</div>
+    <div class="eyebrow">TRAINING FERTIG</div>
+    <h1>Du warst heute bereit.</h1>
+    <p>Drei Übungen. Rund zehn Minuten. Saubere Bewegungen sind wichtiger als möglichst viele Wiederholungen.</p>
+    <button id="finishBtn" class="primary-btn">Andere Stufe wählen</button>
+  </section>
+
+</main>
+<script src="./app.js?v=6"></script>
+</body>
+</html>

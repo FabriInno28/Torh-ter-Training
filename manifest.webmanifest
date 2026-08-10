@@ -1,0 +1,21 @@
+{
+  "name": "KEEPER10 · Nur ich",
+  "short_name": "KEEPER10",
+  "start_url": "./?v=6",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "description": "10 Minuten individuelles Torhütertraining",
+  "icons": [
+    {
+      "src": "./k10-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./k10-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
