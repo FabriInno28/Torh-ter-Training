@@ -1,8 +1,8 @@
-const CACHE='keeper10-golden-v6-2-20260810';
+const CACHE='keeper10-golden-v7-2-20260810';
 const ASSETS=[
- './','./index.html','./styles.css?v=6','./app.js?v=6','./manifest.webmanifest?v=6',
- './k10_bereit_ablauf_v6.jpg','./k10_schritte_ablauf_v6.jpg','./k10_spring_ablauf_v6.jpg',
- './k10_bereit_clip_v6.mp4','./k10_schritte_clip_v6.mp4','./k10_spring_clip_v6.mp4','./k10-icon-192.png','./k10-icon-512.png'
+ './','./index.html','./styles.css?v=7','./app.js?v=7','./manifest.webmanifest?v=7',
+ './k10_bereit_ablauf_v7.jpg','./k10_schritte_ablauf_v7.jpg','./k10_spring_ablauf_v7.jpg',
+ './k10_bereit_clip_v7.mp4','./k10_schritte_clip_v7.mp4','./k10_spring_clip_v7.mp4','./k10-icon-192.png','./k10-icon-512.png'
 ];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});

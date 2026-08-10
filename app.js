@@ -13,84 +13,84 @@ const LEVELS = {
 const EXERCISES = [
   {
     id:'bereit', title:'Bereit!', no:'ÜBUNG 1 VON 3',
-    story:'./k10_bereit_ablauf_v6.jpg', video:'./k10_bereit_clip_v6.mp4',
+    story:'./k10_bereit_ablauf_v7.jpg', video:'./k10_bereit_clip_v7.mp4',
     why:'Deine Grundstellung ist der Start für fast jede Parade. Je sauberer du vor dem Abschluss bereit bist, desto besser kannst du reagieren.',
     variants:{
       start:{
         desc:'Vom lockeren Stand sofort in eine stabile Grundstellung.',
         steps:['Locker und aufrecht stehen.','Auf BEREIT reagieren.','Füsse etwa schulterbreit setzen.','2 Sekunden stabil bleiben, dann wieder locker.'],
         focus:['Knie weich, nicht tief sitzen.','Gewicht auf dem Vorderfuss, nicht auf den Fersen.','Hände vor dem Körper bereit.','Oberkörper ruhig und offen.'],
-        mode:'interval', work:30, rest:20, rounds:3, commands:'readyStart',
+        mode:'interval', work:30, rest:8, rounds:3, commands:'readyStart',
         hint:'Bleib locker. Wenn BEREIT kommt, setzt du dich sofort sauber in deine Grundstellung.'
       },
       plus:{
         desc:'Erst bewegen, dann im richtigen Moment bereit sein.',
         steps:['Auf LINKS oder RECHTS einen kleinen Seitwärtsschritt machen.','Weiter locker bleiben.','Bei BEREIT sofort stoppen.','Grundstellung kurz halten und neu starten.'],
         focus:['Nur kleine Bewegungen.','Füsse nicht kreuzen.','Beim Signal beide Füsse stabil am Boden.','Nicht nachwippen.'],
-        mode:'interval', work:30, rest:20, rounds:3, commands:'readyPlus',
+        mode:'interval', work:30, rest:8, rounds:3, commands:'readyPlus',
         hint:'Die App bewegt dich kurz. Bei BEREIT musst du sofort stabil stehen.'
       },
       spielnah:{
         desc:'Bewege dich mit und sei genau beim gedachten Abschluss bereit.',
         steps:['Auf LINKS und RECHTS mit kleinen Schritten reagieren.','Die Richtung kann wechseln.','Bei SCHUSS sofort stoppen.','In der Grundstellung bleiben, bis die nächste Folge startet.'],
         focus:['Nicht raten. Erst Signal, dann Bewegung.','Kleine Schritte behalten.','Bei SCHUSS keine Füsse mehr in der Luft.','Kopf und Oberkörper ruhig.'],
-        mode:'interval', work:30, rest:20, rounds:3, commands:'readyGame',
+        mode:'interval', work:30, rest:8, rounds:3, commands:'readyGame',
         hint:'Stell dir vor, der Ball wird vor deinem Tor verschoben. Bei SCHUSS musst du bereit sein.'
       }
     }
   },
   {
     id:'schritte', title:'Schritte & Stopp', no:'ÜBUNG 2 VON 3',
-    story:'./k10_schritte_ablauf_v6.jpg', video:'./k10_schritte_clip_v6.mp4',
+    story:'./k10_schritte_ablauf_v7.jpg', video:'./k10_schritte_clip_v7.mp4',
     why:'Ein Torhüter muss sich schnell verschieben können und trotzdem vor dem Abschluss wieder stabil stehen. Schnelligkeit ohne Kontrolle hilft dir wenig.',
     variants:{
       start:{
         desc:'Kleine Seitwärtsschritte in einem klaren Rhythmus.',
         steps:['LINKS: zwei kleine Seitwärtsschritte.','STOPP: sofort Grundstellung.','RECHTS: zwei kleine Seitwärtsschritte.','STOPP: wieder stabil stehen.'],
         focus:['Füsse nie kreuzen.','Schritte kurz und bodennah.','Oberkörper bleibt ruhig.','Beim Stopp sofort bereit.'],
-        mode:'interval', work:30, rest:20, rounds:3, commands:'stepsStart',
+        mode:'interval', work:30, rest:8, rounds:3, commands:'stepsStart',
         hint:'Der Rhythmus ist vorhersehbar. Nutze ihn, um deine Fussarbeit sauber zu machen.'
       },
       plus:{
         desc:'Die Richtung kommt zufällig. Du musst schneller umstellen.',
         steps:['Auf LINKS oder RECHTS sofort reagieren.','Zwei kurze Seitwärtsschritte.','Bei STOPP direkt anhalten.','Neu aus der Grundstellung starten.'],
         focus:['Erster Schritt in die richtige Richtung.','Nicht zu grosse Schritte.','Füsse bleiben unter dem Körper.','Stopp heisst wirklich Stopp.'],
-        mode:'interval', work:30, rest:20, rounds:4, commands:'stepsPlus',
+        mode:'interval', work:30, rest:8, rounds:4, commands:'stepsPlus',
         hint:'Du kennst die nächste Richtung nicht. Reagiere erst auf das Signal.'
       },
       spielnah:{
         desc:'Mehrere Richtungswechsel. Der Abschluss kommt irgendwann.',
         steps:['Folge LINKS und RECHTS mit kurzen Schritten.','Die App kann die Richtung direkt wechseln.','Bei SCHUSS sofort stoppen.','Grundstellung halten und wieder neu beginnen.'],
         focus:['Nie hektisch kreuzen.','Vor jedem Richtungswechsel Körper kontrollieren.','Bei SCHUSS beide Füsse am Boden.','Qualität behalten, auch wenn es schneller wird.'],
-        mode:'interval', work:30, rest:20, rounds:4, commands:'stepsGame',
+        mode:'interval', work:30, rest:8, rounds:4, commands:'stepsGame',
         hint:'Stell dir vor, der Ball wird vor deinem Tor von links nach rechts gespielt. Bei SCHUSS musst du stehen und bereit sein.'
       }
     }
   },
   {
     id:'spring', title:'Spring · Land · Bereit', no:'ÜBUNG 3 VON 3',
-    story:'./k10_spring_ablauf_v6.jpg', video:'./k10_spring_clip_v6.mp4',
+    story:'./k10_spring_ablauf_v7.jpg', video:'./k10_spring_clip_v7.mp4',
     why:'Nach einem Sprung ist die Aktion nicht vorbei. Gute Torhüter landen kontrolliert und sind sofort bereit für die nächste Situation.',
     variants:{
       start:{
         desc:'Kurzer Sprung. Weiche Landung. Sofort wieder bereit.',
         steps:['Auf HOCH kurz abspringen.','Nicht maximal hoch springen.','Auf beiden Füssen weich landen.','Direkt in die Grundstellung.'],
         focus:['Landung leise und kontrolliert.','Knie bleiben stabil.','Füsse etwa schulterbreit landen.','Nach der Landung sofort ruhig stehen.'],
-        mode:'autoReps', rounds:3, reps:4, rest:30, commands:'jumpStart',
+        mode:'autoReps', rounds:3, reps:4, rest:10, commands:'jumpStart',
         hint:'Vier saubere Sprünge pro Serie. Höhe ist unwichtig. Die Landung zählt.'
       },
       plus:{
         desc:'Kurze seitliche Sprünge und danach sofort stabil werden.',
         steps:['Auf LINKS oder RECHTS kurz seitlich abspringen.','Nur eine kleine Distanz springen.','Weich auf beiden Füssen landen.','Direkt wieder Grundstellung.'],
         focus:['Nicht weit springen.','Landung kontrollieren, bevor du neu startest.','Knie nicht nach innen fallen lassen.','Blick bleibt nach vorne.'],
-        mode:'autoReps', rounds:3, reps:4, rest:30, commands:'jumpPlus',
+        mode:'autoReps', rounds:3, reps:4, rest:10, commands:'jumpPlus',
         hint:'Die Richtung ist zufällig. Kurzer explosiver Impuls, dann sofort stabil.'
       },
       spielnah:{
         desc:'Richtung erkennen, springen, landen und beim gedachten Schuss wieder bereit sein.',
         steps:['Auf HOCH, LINKS oder RECHTS reagieren.','Kurz und kontrolliert springen.','Weich landen.','Bei SCHUSS sofort Grundstellung zeigen.'],
         focus:['Erst hören, dann springen.','Keine maximalen Sprünge.','Landung stabilisieren.','Bei SCHUSS sofort handlungsfähig.'],
-        mode:'autoReps', rounds:3, reps:4, rest:30, commands:'jumpGame',
+        mode:'autoReps', rounds:3, reps:4, rest:10, commands:'jumpGame',
         hint:'Jede Wiederholung endet mit SCHUSS. Zeig nach der Landung sofort deine Grundstellung.'
       }
     }
@@ -117,16 +117,80 @@ function fmt(sec){ const m=Math.floor(Math.max(0,sec)/60); const s=Math.max(0,se
 async function requestWakeLock(){ try{ if('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }catch(e){} }
 function releaseWakeLock(){ try{ wakeLock?.release(); }catch(e){} wakeLock=null; }
 
+let audioUnlocked = false;
+
+async function unlockAudio(test=false){
+  if(!audioOn) return false;
+  try{
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return false;
+      audioCtx = new AC({latencyHint:'interactive'});
+    }
+    if(audioCtx.state !== 'running') await audioCtx.resume();
+    audioUnlocked = audioCtx.state === 'running';
+    if(audioUnlocked && test){
+      beep(820,.10,.085);
+      setTimeout(()=>beep(1040,.08,.07),120);
+      setTimeout(()=>speak('Ton bereit'),220);
+    }
+    updateSoundButton();
+    return audioUnlocked;
+  }catch(e){
+    audioUnlocked = false;
+    updateSoundButton();
+    return false;
+  }
+}
 function ensureAudio(){
-  if(!audioCtx){ const AC=window.AudioContext||window.webkitAudioContext; if(AC) audioCtx=new AC(); }
-  if(audioCtx?.state==='suspended') audioCtx.resume().catch(()=>{});
+  if(!audioOn) return;
+  if(audioCtx?.state === 'suspended') audioCtx.resume().then(()=>{audioUnlocked=true;updateSoundButton();}).catch(()=>{});
 }
-function beep(freq=680,d=.07){
-  if(!audioOn||!audioCtx) return;
-  const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.frequency.value=freq; g.gain.value=.045; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d); o.stop(audioCtx.currentTime+d);
+function beep(freq=680,d=.07,vol=.075){
+  if(!audioOn||!audioCtx||audioCtx.state!=='running') return;
+  const now=audioCtx.currentTime;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(freq,now);
+  g.gain.setValueAtTime(.0001,now);
+  g.gain.exponentialRampToValueAtTime(vol,now+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,now+d);
+  o.connect(g); g.connect(audioCtx.destination); o.start(now); o.stop(now+d+.02);
 }
-function speak(text){ if(!audioOn||!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='de-CH'; u.rate=.93; u.pitch=1; speechSynthesis.speak(u); }
-function cue(text){ showSignal(text); beep(); speak(text==='SCHUSS'?'Schuss':text.charAt(0)+text.slice(1).toLowerCase()); }
+function commandTone(text){
+  if(text==='LINKS') return beep(590,.08,.08);
+  if(text==='RECHTS') return beep(820,.08,.08);
+  if(text==='STOPP') { beep(520,.07,.09); setTimeout(()=>beep(520,.07,.09),100); return; }
+  if(text==='SCHUSS') { beep(980,.07,.09); setTimeout(()=>beep(1180,.08,.09),90); return; }
+  if(text==='HOCH') return beep(1040,.09,.08);
+  if(text==='BEREIT') return beep(760,.09,.08);
+  beep(680,.07,.075);
+}
+function germanVoice(){
+  if(!('speechSynthesis' in window)) return null;
+  const voices=speechSynthesis.getVoices();
+  return voices.find(v=>/^de-CH/i.test(v.lang)) || voices.find(v=>/^de-DE/i.test(v.lang)) || voices.find(v=>/^de/i.test(v.lang)) || null;
+}
+function speak(text){
+  if(!audioOn||!('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.resume();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='de-CH'; u.rate=1.08; u.pitch=1;
+    const v=germanVoice(); if(v) u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function cue(text){
+  showSignal(text);
+  commandTone(text);
+  speak(text==='SCHUSS'?'Schuss':text.charAt(0)+text.slice(1).toLowerCase());
+}
+function updateSoundButton(){
+  const b=$('soundBtn'); if(!b) return;
+  if(!audioOn){b.textContent='🔇 Ton aus';b.setAttribute('aria-pressed','false');return;}
+  b.textContent=audioUnlocked?'🔊 Ton an':'🔊 Ton aktivieren';
+  b.setAttribute('aria-pressed','true');
+}
 function showSignal(text,rest=false){ $('signal').textContent=text; $('signal').classList.toggle('rest',rest); }
 function clearAll(){ clearInterval(interval); clearTimeout(commandTimer); clearTimeout(secondTimer); interval=null;commandTimer=null;secondTimer=null; if('speechSynthesis' in window) speechSynthesis.cancel(); }
 
@@ -149,30 +213,80 @@ function renderTrainingBase(){
 }
 
 function scheduleReadyStart(){
-  commandTimer=setTimeout(()=>{ if(state?.phase!=='work')return; cue('BEREIT'); secondTimer=setTimeout(()=>{if(state?.phase==='work')showSignal('LOCKER',true);},1700); scheduleReadyStart(); },3600+Math.random()*2200);
+  commandTimer=setTimeout(()=>{
+    if(state?.phase!=='work')return;
+    cue('BEREIT');
+    secondTimer=setTimeout(()=>{
+      if(state?.phase==='work'){
+        showSignal('LOCKER',true);
+        scheduleReadyStart();
+      }
+    },900);
+  },2200+Math.random()*1200);
 }
 function scheduleReadyPlus(){
-  commandTimer=setTimeout(()=>{ if(state?.phase!=='work')return; const d=Math.random()<.5?'LINKS':'RECHTS'; cue(d); secondTimer=setTimeout(()=>{if(state?.phase!=='work')return;cue('BEREIT'); secondTimer=setTimeout(()=>{if(state?.phase==='work')showSignal('LOCKER',true); scheduleReadyPlus();},1500);},1100); },2500+Math.random()*1400);
+  commandTimer=setTimeout(()=>{
+    if(state?.phase!=='work')return;
+    const d=Math.random()<.5?'LINKS':'RECHTS';
+    cue(d);
+    secondTimer=setTimeout(()=>{
+      if(state?.phase!=='work')return;
+      cue('BEREIT');
+      secondTimer=setTimeout(()=>{
+        if(state?.phase==='work'){
+          showSignal('LOCKER',true);
+          scheduleReadyPlus();
+        }
+      },800);
+    },700);
+  },1400+Math.random()*700);
 }
 function scheduleGameSequence(stopWord='SCHUSS'){
   if(state?.phase!=='work') return;
   let count=1+Math.floor(Math.random()*3), i=0;
-  const move=()=>{ if(state?.phase!=='work')return; if(i>=count){ cue(stopWord); secondTimer=setTimeout(()=>{if(state?.phase==='work'){showSignal('BEREIT',true);commandTimer=setTimeout(()=>scheduleGameSequence(stopWord),1200);}},1500); return;} cue(Math.random()<.5?'LINKS':'RECHTS'); i++; secondTimer=setTimeout(move,1100+Math.random()*500); };
-  commandTimer=setTimeout(move,1700+Math.random()*900);
+  const move=()=>{
+    if(state?.phase!=='work')return;
+    if(i>=count){
+      cue(stopWord);
+      secondTimer=setTimeout(()=>{
+        if(state?.phase==='work'){
+          showSignal('BEREIT',true);
+          commandTimer=setTimeout(()=>scheduleGameSequence(stopWord),500);
+        }
+      },900);
+      return;
+    }
+    cue(Math.random()<.5?'LINKS':'RECHTS');
+    i++;
+    secondTimer=setTimeout(move,750+Math.random()*350);
+  };
+  commandTimer=setTimeout(move,900+Math.random()*500);
 }
 function scheduleStepsStart(){
-  let dir=state.stepAlt||'LINKS'; cue(dir); state.stepAlt=dir==='LINKS'?'RECHTS':'LINKS'; secondTimer=setTimeout(()=>{if(state?.phase!=='work')return;cue('STOPP');commandTimer=setTimeout(scheduleStepsStart,1200);},1350);
+  let dir=state.stepAlt||'LINKS';
+  cue(dir);
+  state.stepAlt=dir==='LINKS'?'RECHTS':'LINKS';
+  secondTimer=setTimeout(()=>{
+    if(state?.phase!=='work')return;
+    cue('STOPP');
+    commandTimer=setTimeout(scheduleStepsStart,650);
+  },900);
 }
 function scheduleStepsPlus(){
-  cue(Math.random()<.5?'LINKS':'RECHTS'); secondTimer=setTimeout(()=>{if(state?.phase!=='work')return;cue('STOPP');commandTimer=setTimeout(scheduleStepsPlus,1000+Math.random()*600);},1250);
+  cue(Math.random()<.5?'LINKS':'RECHTS');
+  secondTimer=setTimeout(()=>{
+    if(state?.phase!=='work')return;
+    cue('STOPP');
+    commandTimer=setTimeout(scheduleStepsPlus,550+Math.random()*300);
+  },800);
 }
 function startCommands(mode){
   clearTimeout(commandTimer); clearTimeout(secondTimer);
   if(mode==='readyStart')scheduleReadyStart();
   if(mode==='readyPlus')scheduleReadyPlus();
   if(mode==='readyGame')scheduleGameSequence('SCHUSS');
-  if(mode==='stepsStart')commandTimer=setTimeout(scheduleStepsStart,1200);
-  if(mode==='stepsPlus')commandTimer=setTimeout(scheduleStepsPlus,1200);
+  if(mode==='stepsStart')commandTimer=setTimeout(scheduleStepsStart,700);
+  if(mode==='stepsPlus')commandTimer=setTimeout(scheduleStepsPlus,700);
   if(mode==='stepsGame')scheduleGameSequence('SCHUSS');
 }
 
@@ -194,20 +308,20 @@ function scheduleNextJump(){
   if(state?.phase!=='reps') return;
   if(state.rep>=v.reps){ if(state.round>=v.rounds) completeExercise(); else startJumpRest(); return; }
   state.rep++; $('timerValue').textContent=`${state.rep} / ${v.reps}`; const c=jumpCueFor(v.commands); cue(c);
-  if(v.commands==='jumpGame'){ secondTimer=setTimeout(()=>{if(state?.phase==='reps')cue('SCHUSS');},1200); }
-  commandTimer=setTimeout(scheduleNextJump,v.commands==='jumpGame'?4300:3600);
+  if(v.commands==='jumpGame'){ secondTimer=setTimeout(()=>{if(state?.phase==='reps')cue('SCHUSS');},850); }
+  commandTimer=setTimeout(scheduleNextJump,v.commands==='jumpGame'?3000:2600);
 }
 function startJumpRound(resetRep=true){
   const v=variant(); state.phase='reps'; if(resetRep) state.rep=0; $('roundLabel').textContent=`Serie ${state.round} von ${v.rounds}`; $('timerValue').textContent=`${state.rep} / ${v.reps}`; $('trainingMainBtn').textContent='Pause'; $('trainingMainBtn').disabled=false; showSignal('BEREIT',true); if(resetRep) beep(760,.09);
-  commandTimer=setTimeout(scheduleNextJump,1200);
+  commandTimer=setTimeout(scheduleNextJump,800);
 }
 function startJumpRest(){
   const v=variant(); clearAll(); state.phase='rest'; state.remaining=v.rest; showSignal('PAUSE',true); $('timerValue').textContent=fmt(state.remaining); $('trainingHint').textContent='Locker ausschütteln. Die nächste Serie startet automatisch.'; beep(430,.12);
   interval=setInterval(()=>{state.remaining--; $('timerValue').textContent=fmt(state.remaining); if(state.remaining<=0){clearInterval(interval);state.round++;$('trainingHint').textContent=v.hint;startJumpRound();}},1000);
 }
 
-function startTraining(){
-  clearAll(); ensureAudio(); requestWakeLock(); renderTrainingBase(); const v=variant(); state={phase:'ready',round:1,remaining:0,stepAlt:'LINKS'};
+async function startTraining(){
+  clearAll(); if(audioOn) await unlockAudio(true); requestWakeLock(); renderTrainingBase(); updateSoundButton(); const v=variant(); state={phase:'ready',round:1,remaining:0,stepAlt:'LINKS'};
   if(v.mode==='interval'){ $('roundLabel').textContent=`Durchgang 1 von ${v.rounds}`; $('timerValue').textContent=fmt(v.work); showSignal('BEREIT',true); $('trainingMainBtn').textContent='Start'; }
   else { $('roundLabel').textContent=`Serie 1 von ${v.rounds}`; $('timerValue').textContent=`0 / ${v.reps}`; showSignal('BEREIT',true); $('trainingMainBtn').textContent='Start'; }
   show('trainingScreen');
@@ -227,9 +341,12 @@ $('exerciseBack').addEventListener('click',()=>{clearAll();show('overviewScreen'
 $('replayBtn').addEventListener('click',()=>{const v=$('exerciseVideo');v.currentTime=0;v.play().catch(()=>{});});
 $('beginExerciseBtn').addEventListener('click',startTraining);
 $('trainingBack').addEventListener('click',()=>{clearAll();releaseWakeLock();renderExercise();});
-$('soundBtn').addEventListener('click',()=>{audioOn=!audioOn;$('soundBtn').textContent=audioOn?'🔊 Ton':'🔇 Ton aus';$('soundBtn').setAttribute('aria-pressed',String(audioOn));if(audioOn)ensureAudio();});
-$('trainingMainBtn').addEventListener('click',()=>{
-  ensureAudio();
+$('soundBtn').addEventListener('click',async()=>{
+  if(audioOn && audioUnlocked){ audioOn=false; updateSoundButton(); return; }
+  audioOn=true; await unlockAudio(true); updateSoundButton();
+});
+$('trainingMainBtn').addEventListener('click',async()=>{
+  if(audioOn && !audioUnlocked) await unlockAudio(true); else ensureAudio();
   if(state.phase==='ready'){beginFromReady();return;}
   if(state.phase==='work'){ clearAll(); state.phase='manualWork'; showSignal('PAUSE',true); $('trainingMainBtn').textContent='Weiter'; $('trainingHint').textContent='Training angehalten.'; return; }
   if(state.phase==='manualWork'){ const v=variant(); $('trainingHint').textContent=v.hint; runIntervalWork(false); return; }
@@ -240,4 +357,4 @@ $('nextExerciseBtn').addEventListener('click',()=>{currentIndex++;renderExercise
 $('finishBtn').addEventListener('click',()=>{currentIndex=0;show('startScreen');});
 
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&state?.phase&&(state.phase==='work'||state.phase==='reps'))requestWakeLock();});
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=6').then(r=>r.update()).catch(()=>{}));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=7').then(r=>r.update()).catch(()=>{}));}
