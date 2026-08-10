@@ -1,9 +1,16 @@
-KEEPER 10 – Page Build
+KEEPER10 – iPhone optimierte Homepage v3 FLAT
 
-Enthalten:
+Alle Dateien liegen im selben Ordner. Keine Unterordner.
+
+Dateien:
 - index.html
 - styles.css
 - app.js
-- 6 lokale Übungsbilder
+- bereit.png
+- schritte-und-stopp.png
+- spring-land-bereit.png
+- fallen-und-fangen.png
+- hoch-und-hin.png
+- schraeger-absprung.png
 
-Einfach alle Dateien ins Root-Verzeichnis des GitHub-Pages-Repositories laden.
+Für GitHub Pages einfach alle Dateien direkt ins Root-Verzeichnis des Repositories laden.
